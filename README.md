@@ -4,6 +4,8 @@
 
 ![A Pro round: block, hit, counter](Media/demo.gif)
 
+**Main demo (1:32): a full Pro round, with me in the room in the corner:** [Media/demo-pro-with-me.mp4](Media/demo-pro-with-me.mp4)
+
 **Demo video (1:14), final version:** [Media/demo.mp4](Media/demo.mp4). A Pro round under fight-night lighting, with counters and the round summary.
 
 **Earlier build (1:44):** [Media/demo-v1.mp4](Media/demo-v1.mp4). Hard and Medium rounds, the telegraph, feints and ducks.

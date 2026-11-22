@@ -111,5 +111,6 @@ A better metric would:
 
 ## Demo
 
+- [`Media/demo-pro-with-me.mp4`](../Media/demo-pro-with-me.mp4) (1:32): a full Pro round, with me in the room picture-in-picture.
 - [`Media/demo.mp4`](../Media/demo.mp4) (1:14): the final version, with a Pro round under fight-night lighting, counters, and the summary.
 - [`Media/demo-v1.mp4`](../Media/demo-v1.mp4) (1:44): the earlier build, with Hard and Medium rounds, the telegraph, feints and ducks.

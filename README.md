@@ -4,11 +4,15 @@
 
 ![A Pro round: block, hit, counter](Media/demo.gif)
 
-**Main demo (1:32): a full Pro round, with me in the room in the corner:** [Media/demo-pro-with-me.mp4](Media/demo-pro-with-me.mp4)
+## Demo
 
-**Demo video (1:14), final version:** [Media/demo.mp4](Media/demo.mp4). A Pro round under fight-night lighting, with counters and the round summary.
+**▶ [Watch the demo video on Google Drive (1:32)](https://drive.google.com/file/d/1LHLMfgTcR4ptd-N6Bjcx0mdfRyP-jcrH/view?usp=sharing)**: a full Pro round in the headset, with me in the room in the corner.
 
-**Earlier build (1:44):** [Media/demo-v1.mp4](Media/demo-v1.mp4). Hard and Medium rounds, the telegraph, feints and ducks.
+More videos in the repo:
+
+- [Media/demo-pro-with-me.mp4](Media/demo-pro-with-me.mp4): the same main demo
+- [Media/demo.mp4](Media/demo.mp4) (1:14): a Pro round with captions, counters and the round summary
+- [Media/demo-v1.mp4](Media/demo-v1.mp4) (1:44): the earlier build, with Hard and Medium rounds, the telegraph, feints and ducks
 
 **In the real world:** what I'm actually doing in the room while the opponent punches, from the first build to the final one.
 

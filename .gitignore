@@ -1,0 +1,45 @@
+# Unity generated
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+/[Mm]emoryCaptures/
+/[Rr]ecordings/
+
+# IDE / solution files Unity regenerates
+.vs/
+.vscode/
+.idea/
+*.csproj
+*.unityproj
+*.sln
+*.slnx
+*.suo
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+
+# Builds
+*.apk
+*.aab
+*.unitypackage
+*.app
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Raw recordings (keep videos under 50 MB or link them)
+/Media/raw/
+
+# Unity tooling cache
+.utmp/

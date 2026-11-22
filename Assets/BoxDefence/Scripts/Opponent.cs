@@ -88,6 +88,8 @@ namespace BoxDefence
         readonly bool[] defenceRolled = new bool[2];
         float openUntil, headFlashUntil;
         float lunge, lungeTarget;
+        float twist, twistTarget;        // degrees his body turns into a punch (real model only)
+        float drive, driveTarget;        // metres his head leans forward behind a punch
         Vector3 flinch, lean, leanTarget;
         float leanUntil;
         Vector3 headBaseLocal;
@@ -145,6 +147,8 @@ namespace BoxDefence
             busy[0] = busy[1] = false;
             openUntil = 0f;
             lungeTarget = 0f;
+            twistTarget = 0f;
+            driveTarget = 0f;
             SetGloveColor(0, gloveColor);
             SetGloveColor(1, gloveColor);
         }
@@ -175,6 +179,8 @@ namespace BoxDefence
             leanTarget = Time.time < leanUntil ? leanTarget : Vector3.zero;
             lean = Vector3.Lerp(lean, leanTarget, 1f - Mathf.Exp(-18f * dt));
             lunge = Mathf.MoveTowards(lunge, lungeTarget, dt * 2.5f);
+            twist = Mathf.Lerp(twist, twistTarget, 1f - Mathf.Exp(-22f * dt));
+            drive = Mathf.Lerp(drive, driveTarget, 1f - Mathf.Exp(-22f * dt));
 
             Color hc = Time.time < headFlashUntil ? Color.white
                      : IsOpen ? Color.Lerp(skinColor, openColor, 0.75f) : skinColor;
@@ -196,7 +202,8 @@ namespace BoxDefence
             }
             if (puppet)
             {
-                puppet.headOffset = flinch + lean;
+                puppet.headOffset = flinch + lean + transform.forward * drive;
+                puppet.twist = twist;
                 // his animated head bone goes under the head hit sphere (about 9 cm below its centre)
                 Vector3 p = transform.position - puppet.HeadOffsetFlat;
                 puppet.transform.position = new Vector3(p.x, floorY, p.z);
@@ -367,6 +374,7 @@ namespace BoxDefence
                 glovePos[g] = Vector3.Lerp(from, back, DefenceMath.Smooth(k));
                 SetGloveColor(g, Color.Lerp(gloveColor, telegraphColor, k));
                 if (feint) lungeTarget = 0.06f * k;          // a little shoulder dip sells it
+                twistTarget = side * (hook ? 14f : 9f) * k;   // load: the punching shoulder turns back
                 if (reaction < 0f && (rig.HeadPos - headStart).magnitude > DefenceMath.MinMove) reaction = Time.time - t0;
                 yield return null;
             }
@@ -375,6 +383,7 @@ namespace BoxDefence
             {
                 // retract, and keep watching for a late flinch
                 lungeTarget = 0f;
+                twistTarget = 0f;
                 Vector3 rf = glovePos[g];
                 const float back = 0.28f;
                 for (float t = 0f; t < back; t += Time.deltaTime)
@@ -403,6 +412,9 @@ namespace BoxDefence
 
             // 2. strike: aimed at where the head is NOW, so standing still gets you hit
             lungeTarget = 0.16f;
+            // shoulders and hips turn the punching side forward; more for a cross or hook than a jab
+            twistTarget = -side * (hook ? 34f : kind == PunchKind.Jab ? 14f : 26f);
+            driveTarget = kind == PunchKind.Jab ? 0.04f : 0.08f;
             Vector3 start = glovePos[g];
             Vector3 shoulder = Shoulder(g);
             Vector3 aim = rig.HeadPos;
@@ -456,6 +468,8 @@ namespace BoxDefence
 
             // 3. retract to guard
             lungeTarget = 0f;
+            twistTarget = 0f;
+            driveTarget = 0f;
             Vector3 retractFrom = glovePos[g];
             const float retract = 0.22f;
             for (float t = 0f; t < retract; t += Time.deltaTime)

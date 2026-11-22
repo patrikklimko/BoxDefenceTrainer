@@ -41,6 +41,8 @@ Defence in boxing isn't just not getting hit. It's getting into a position to hi
 - Your gloves' speed is tracked. A glove moving towards him that touches his head sphere is a **landed punch**, recorded with its speed in m/s. If it lands during his open window, it's a **counter**, and the crowd cheers.
 - He defends too. Half the time he reacts to an incoming punch: 60 % of those he blocks, otherwise he slips. You can't just stand and swing.
 
+![A counter landing at 4.1 m/s](images/counter.jpg)
+
 ## 4. It adapts, and it coaches
 
 **Adaptive speed.** Every 6 punches, the session looks at how many you defended:

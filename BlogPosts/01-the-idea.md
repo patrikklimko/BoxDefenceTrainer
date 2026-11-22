@@ -51,6 +51,12 @@ Meta's Link software reported my laptop's GPU setup as incompatible, so I couldn
 1. **The scene is built from code.** One menu item (BoxDefence → Build Training Scene) generates the arena, the opponent, the gloves, the menus and all the references between components. Nothing depends on dragging things around in the editor, so a rebuild always gives the same scene. The code is the documentation.
 2. **The logic is tested without the headset.** The maths that decides what happened to a punch (block, slip, duck…) lives in a plain C# class with no scene dependencies. An editor self-check runs 31 tests on it in under a second. A mistake there shows up before I spend 9 minutes on a build.
 
+## The first build
+
+![The first build: me in the room, the headset view in the corner](images/real-world-first.jpg)
+
+The first version that ran on the headset: a capsule opponent, sphere gloves, a ring, and the core loop working. Here's the [13-second clip](../Media/real-world-first.mp4). Everything after it was built on this loop.
+
 ## Next
 
 [Post 2](02-the-opponent.md): how the opponent punches, and how a punch becomes "SLIP LEFT, 153 ms".

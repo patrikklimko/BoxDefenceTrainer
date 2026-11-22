@@ -151,6 +151,10 @@ namespace BoxDefence.EditorTools
 
             var fb = game.AddComponent<Feedback>();
             fb.rig = rig; fb.sfx2D = audio; fb.flash = flashR; fb.popup = popup; fb.crowd = crowdAudio;
+            var fx = new GameObject("Impact Effects").transform;
+            fb.blockFx = BoxDefenceFX.Sparks("Block Sparks"); fb.blockFx.transform.SetParent(fx, true);
+            fb.sweatFx = BoxDefenceFX.Sweat("Sweat Spray"); fb.sweatFx.transform.SetParent(fx, true);
+            fb.crowdAnim = crowdAnimator;
 
             var hud = game.AddComponent<Hud>();
             hud.rig = rig; hud.top = top; hud.panel = panel; hud.panelText = panelText; hud.bars = bars; hud.barMaterial = m.bar;
@@ -165,12 +169,14 @@ namespace BoxDefence.EditorTools
             var sun = GameObject.Find("Directional Light");
             if (sun)
             {
-                sun.transform.rotation = Quaternion.Euler(65f, 20f, 0f);
+                // fight night: light mostly from above the ring, a dark hall around it
+                sun.transform.rotation = Quaternion.Euler(78f, 20f, 0f);
                 var light = sun.GetComponent<Light>();
-                if (light) { light.intensity = 1.3f; light.shadows = LightShadows.None; }
+                if (light) { light.intensity = 1.25f; light.color = new Color(1f, 0.96f, 0.9f); light.shadows = LightShadows.None; }
             }
+            BoxDefenceFX.Glow(m.canvas, 0.18f);
             RenderSettings.ambientMode = AmbientMode.Flat;
-            RenderSettings.ambientLight = new Color(0.36f, 0.36f, 0.42f);
+            RenderSettings.ambientLight = new Color(0.24f, 0.24f, 0.3f);
             RenderSettings.fog = true;
             RenderSettings.fogMode = FogMode.Linear;
             RenderSettings.fogStartDistance = 12f;
@@ -267,6 +273,8 @@ namespace BoxDefence.EditorTools
 
         // ---------------------------------------------------------------- arena
 
+        static CrowdAnimator crowdAnimator;
+
         static void BuildArena(Mats m)
         {
             float floorY = -PlatformHeight;
@@ -309,8 +317,11 @@ namespace BoxDefence.EditorTools
             crowd.SetParent(arena, false);
             var rnd = new System.Random(42);
             var sides = new[] { Vector3.forward, Vector3.back, Vector3.right, Vector3.left };
+            BoxDefenceFX.BeginCrowd();
+            int sideIndex = -1;
             foreach (var n in sides)
             {
+                sideIndex++;
                 Vector3 tangent = Vector3.Cross(Vector3.up, n);
                 for (int r = 0; r < 3; r++)
                 {
@@ -325,14 +336,19 @@ namespace BoxDefence.EditorTools
                         if (rnd.NextDouble() < 0.15) continue; // empty seat
                         Vector3 seat = RingCentre + n * d + tangent * (s + (float)(rnd.NextDouble() - 0.5) * 0.15f);
                         float tall = 0.9f + (float)rnd.NextDouble() * 0.2f;
-                        var shirt = m.shirts[rnd.Next(m.shirts.Length)];
-                        var skin = m.crowdSkins[rnd.Next(m.crowdSkins.Length)];
-                        var bodyGo = Prim(PrimitiveType.Capsule, "Fan", crowd, new Vector3(seat.x, topY + 0.4f * tall, seat.z), new Vector3(0.34f, 0.32f * tall, 0.26f), shirt);
-                        bodyGo.transform.rotation = Quaternion.LookRotation(-n, Vector3.up);
-                        Prim(PrimitiveType.Sphere, "Fan Head", crowd, new Vector3(seat.x, topY + 0.85f * tall, seat.z), Vector3.one * 0.2f, skin);
+                        // fight night: the crowd sits in the dark, the ring is lit
+                        Color shirt = m.shirts[rnd.Next(m.shirts.Length)].GetColor("_BaseColor") * 0.6f;
+                        Color skin = m.crowdSkins[rnd.Next(m.crowdSkins.Length)].GetColor("_BaseColor") * 0.7f;
+                        shirt.a = skin.a = 1f;
+                        int block = s < -d / 3f ? 0 : s < d / 3f ? 1 : 2;
+                        BoxDefenceFX.AddFan($"{sideIndex}-{r}-{block}",
+                            new Vector3(seat.x, topY + 0.4f * tall, seat.z), Quaternion.LookRotation(-n, Vector3.up), new Vector3(0.34f, 0.32f * tall, 0.26f),
+                            new Vector3(seat.x, topY + 0.85f * tall, seat.z), 0.2f, shirt, skin);
                     }
                 }
             }
+
+            crowdAnimator = BoxDefenceFX.EndCrowd("Crowd (animated)");   // outside Arena: it moves, so it can't be static
 
             // walls, roof, lights, banner
             var hall = new GameObject("Hall").transform;
@@ -350,6 +366,8 @@ namespace BoxDefence.EditorTools
             Prim(PrimitiveType.Cube, "Light Bar E", hall, RingCentre + new Vector3(2.8f, rigY, 0f), new Vector3(0.12f, 0.12f, 5f), m.lightBar);
             Prim(PrimitiveType.Cube, "Light Bar W", hall, RingCentre + new Vector3(-2.8f, rigY, 0f), new Vector3(0.12f, 0.12f, 5f), m.lightBar);
             Prim(PrimitiveType.Cube, "Truss", hall, RingCentre + new Vector3(0f, rigY + 0.4f, 0f), new Vector3(6f, 0.1f, 6f), m.truss);
+
+            BoxDefenceFX.FightNightLights(arena, RingCentre, rigY);
 
             var banner = Text("Banner", hall, RingCentre + new Vector3(0f, 4.6f, wall - 0.05f), new Vector2(14f, 3f), 30f, facePlayer: false);
             banner.text = "<b>BOX DEFENCE ARENA</b>\n<size=45%>spar without the concussions</size>";

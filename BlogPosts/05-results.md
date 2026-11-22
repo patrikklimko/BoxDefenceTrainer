@@ -20,30 +20,43 @@ The current result is 31 passed, 0 failed.
 | Recording 1 | My big sphere "gloves" blocked half the view | Smaller, glove-shaped gloves |
 | Recording 1 | Too easy after two rounds, and too clinical | Four levels, feints, Pro mode, arena with crowd, real models |
 | Recording 2 | The real models work. Small bare fists poke out under my gloves, and my gloves still fill a lot of the view | Hands hidden inside the gloves. My gloves shrunk to 24 cm |
+| Recording 2 | I sometimes start near the ropes. He punches with only his arms. The hall looks like a gym. Hits sound thin | Centred in the ring, body rotation into punches, fight-night lighting, a moving crowd, sparks and sweat, layered impact sounds (Post 4) |
+| Recording 3 | All of the above works. A full Pro round | Nothing broken. The data is below |
 
-## Two rounds of data
+From the first build to the final one, filmed in the room at the same time as the headset view:
 
-From the final recording, one round on Hard and one on Medium:
+![First build (left) and final version (right)](images/first-vs-final.jpg)
 
-| | Hard, round 1 | Medium, round 1 |
+- **[First build](../Media/real-world-first.mp4)** (13 s): the capsule opponent, sphere gloves, and an early "HIT, right hook".
+- **[Final version](../Media/real-world-final.mp4)** (14 s): Remy, real gloves and body, the arena, a pull-back at 237 ms and a run of blocks.
+
+The movement in the room is the same in both. The difference is everything around it.
+
+## Three rounds of data
+
+One round each on Medium and Hard from recording 2, and one on Pro from recording 3:
+
+| | Medium | Hard | Pro |
+|---|---|---|---|
+| Punches at me | 42 | 49 | 38 |
+| Blocked | 29 (69 %) | 34 (69 %) | 24 (63 %) |
+| Evaded | 9 (7 ducks, 2 pull-backs) | 4 (2 slips left, 2 ducks) | 1 (a duck) |
+| Hit | **4 (10 %)** | **11 (22 %)** | **13 (34 %)** |
+| Feints | none on this level | **bit on 5 of 5** | **bit on 8 of 9** |
+| Guard up | 92 % | 94 % | **58 %** |
+| Average reaction | 191 ms | 139 ms | 145 ms |
+| My punches landed | – | – | 18 (15 of them counters), plus 14 on his guard. Fastest 5.2 m/s |
+
+| ![Medium](images/medium-summary.jpg) | ![Hard](images/hard-summary.jpg) | ![Pro](images/pro-summary.jpg) |
 |---|---|---|
-| Punches at me | 49 | 42 |
-| Blocked | 34 (69 %) | 29 (69 %) |
-| Evaded | 4 (2 slips left, 2 ducks) | 9 (7 ducks, 2 pull-backs) |
-| Hit | **11 (22 %)** | **4 (10 %)** |
-| Feints | **bit on 5 of 5** | none on this level |
-| Guard up | 94 % | 92 % |
-| Average reaction | 139 ms | 191 ms |
-
-| ![Hard](images/hard-summary.jpg) | ![Medium](images/medium-summary.jpg) |
-|---|---|
-| Hard | Medium |
+| Medium | Hard | Pro |
 
 What this says:
 
-- **Hard is harder.** It got through more than twice as often (22 % against 10 %), with the same guard.
-- **The feints work.** I bit on every single one. That is the most useful thing the trainer told me: I react to the tell, not the punch.
-- **I'm one-sided.** Across both rounds there were zero slips to the right. In the ring, a predictable slip is a slip someone times a hook to. The coaching rule for one-sided slips needs at least 4 slips to fire, so it stayed quiet here. That threshold is probably too high.
+- **Each level is harder than the last.** The share of punches that got through went from 10 % to 22 % to 34 %.
+- **Attacking costs defence.** In Pro, my guard was up only 58 % of the round, against 92–94 % when I only defended, and I took a third of his punches. That's exactly what happens in real sparring: you throw, your hands are away from your face, and that's when you get hit. The coaching note caught it and told me to bring my hands back to my face after every punch.
+- **The feints work.** I bit on 13 of 14 across Hard and Pro. That is the most useful thing the trainer told me: I react to the tell, not the punch.
+- **I'm one-sided.** Across all three rounds there were zero slips to the right. In the ring, a predictable slip is a slip someone times a hook to. The coaching rule for one-sided slips needs at least 4 slips to fire, so it stayed quiet here. That threshold is probably too high.
 - **A high guard does most of the work.** About 70 % of punches hit my gloves. That's realistic, since a tight guard is the first layer of defence. But it means the trainer currently rewards shelling up. See "What I'd change".
 
 ## The honest caveat: reaction time
@@ -98,4 +111,5 @@ A better metric would:
 
 ## Demo
 
-The 1:44 demo video is in the repository: [`Media/demo.mp4`](../Media/demo.mp4).
+- [`Media/demo.mp4`](../Media/demo.mp4) (1:14): the final version, with a Pro round under fight-night lighting, counters, and the summary.
+- [`Media/demo-v1.mp4`](../Media/demo-v1.mp4) (1:44): the earlier build, with Hard and Medium rounds, the telegraph, feints and ducks.

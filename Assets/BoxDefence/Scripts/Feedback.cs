@@ -18,7 +18,13 @@ namespace BoxDefence
         public TextMeshPro popup;      // above the opponent
         public AudioSource crowd;      // looping arena murmur
 
-        AudioClip bell, thud, block, whoosh, landed, pad, crowdLoop, cheer, ooh;
+        [Header("Effects (optional)")]
+        public ParticleSystem blockFx;   // sparks where gloves meet
+        public ParticleSystem sweatFx;   // spray when your punch lands
+        public CrowdAnimator crowdAnim;  // fans bob, and jump when they cheer
+
+        AudioClip bell, whoosh, pad, crowdLoop, cheer, ooh;
+        AudioClip[] thuds, blocks, landeds;     // three takes each, so repeated hits don't sound like a loop
         float flashAlpha;
         float popupUntil;
         Color popupColor = Color.white;
@@ -30,12 +36,16 @@ namespace BoxDefence
             mpb = new MaterialPropertyBlock();
             bell = Synth.Make("bell", 1.6f, t =>
                 (0.5f * Synth.Sin(880f, t) + 0.3f * Synth.Sin(1320f, t) + 0.15f * Synth.Sin(2637f, t)) * Mathf.Exp(-2.5f * t));
-            var n1 = new System.Random(1);
-            thud = Synth.Make("thud", 0.35f, t =>
-                0.9f * Synth.Sin(70f * (1f - 0.8f * t), t) * Mathf.Exp(-9f * t) + 0.5f * Synth.Noise(n1) * Mathf.Exp(-40f * t));
-            var n2 = new System.Random(2);
-            block = Synth.Make("block", 0.2f, t =>
-                0.5f * Synth.Sin(240f, t) * Mathf.Exp(-25f * t) + 0.5f * Synth.Noise(n2) * Mathf.Exp(-60f * t));
+            // impacts: a low body thump with a falling pitch, a sharp leather smack, a tiny crack,
+            // all pushed through soft saturation so they hit like a punch instead of beeping
+            thuds = new AudioClip[3]; blocks = new AudioClip[3]; landeds = new AudioClip[3];
+            for (int v = 0; v < 3; v++)
+            {
+                float f = 1f + 0.07f * (v - 1);
+                thuds[v] = Synth.Impact("thud" + v, 10 + v, 0.45f, 140f * f, 42f * f, 11f, 1.15f, 0.36f, 0.92f, 1.7f, 70f, 0.6f, 1.9f);
+                landeds[v] = Synth.Impact("landed" + v, 20 + v, 0.35f, 170f * f, 65f * f, 15f, 0.9f, 0.45f, 0.9f, 1.9f, 60f, 0.7f, 1.7f);
+                blocks[v] = Synth.Impact("block" + v, 30 + v, 0.25f, 115f * f, 60f * f, 22f, 0.8f, 0.17f, 0.95f, 1.3f, 45f, 0.15f, 1.4f);
+            }
             var n3 = new System.Random(3);
             float lp = 0f;
             whoosh = Synth.Make("whoosh", 0.25f, t =>
@@ -43,9 +53,6 @@ namespace BoxDefence
                 lp += 0.15f * (Synth.Noise(n3) - lp);                 // one-pole low-pass: airy, not hissy
                 return 1.4f * lp * Mathf.Sin(Mathf.PI * t / 0.25f);
             });
-            var n4 = new System.Random(4);
-            landed = Synth.Make("landed", 0.25f, t =>
-                0.8f * Synth.Sin(130f, t) * Mathf.Exp(-18f * t) + 0.6f * Synth.Noise(n4) * Mathf.Exp(-45f * t));
             var n5 = new System.Random(5);
             pad = Synth.Make("pad", 0.12f, t =>
                 0.4f * Synth.Noise(n5) * Mathf.Exp(-70f * t) + 0.3f * Synth.Sin(420f, t) * Mathf.Exp(-40f * t));
@@ -105,29 +112,33 @@ namespace BoxDefence
         public void Cheer(float volume = 0.6f)
         {
             if (sfx2D) sfx2D.PlayOneShot(cheer, volume);
+            if (crowdAnim) crowdAnim.Excite(Mathf.Clamp01(volume + 0.3f));
         }
 
         public void Ooh(float volume = 0.45f)
         {
             if (sfx2D) sfx2D.PlayOneShot(ooh, volume);
+            if (crowdAnim) crowdAnim.Excite(0.35f);
         }
 
         public void TookHit()
         {
-            if (sfx2D) sfx2D.PlayOneShot(thud, 1f);
+            if (sfx2D) sfx2D.PlayOneShot(Pick(thuds), 1f);
             flashAlpha = 0.55f;
             if (rig) rig.HapticBoth(0.9f, 0.25f);
         }
 
         public void Blocked(Vector3 at, bool leftHand)
         {
-            PlayAt(block, at, 1f);
+            PlayAt(Pick(blocks), at, 1f);
+            Burst(blockFx, at, 26);
             if (rig) rig.Haptic(leftHand, 0.6f, 0.08f);
         }
 
         public void Landed(Vector3 at, bool leftHand)
         {
-            PlayAt(landed, at, 1f);
+            PlayAt(Pick(landeds), at, 1f);
+            Burst(sweatFx, at, 32);
             if (rig) rig.Haptic(leftHand, 0.8f, 0.1f);
         }
 
@@ -143,6 +154,15 @@ namespace BoxDefence
             popup.text = text;
             popupColor = color;
             popupUntil = Time.time + seconds;
+        }
+
+        static AudioClip Pick(AudioClip[] clips) => clips[UnityEngine.Random.Range(0, clips.Length)];
+
+        static void Burst(ParticleSystem fx, Vector3 at, int count)
+        {
+            if (!fx) return;
+            fx.transform.position = at;
+            fx.Emit(count);
         }
 
         static void PlayAt(AudioClip clip, Vector3 at, float volume)
@@ -177,6 +197,32 @@ namespace BoxDefence
 
         public static float Sin(float hz, float t) => Mathf.Sin(2f * Mathf.PI * hz * t);
         public static float Noise(System.Random r) => (float)(r.NextDouble() * 2.0 - 1.0);
+
+        /// <summary>
+        /// A punch-like impact. body: sine sweeping from bodyHi to bodyLo Hz, decaying at bodyDecay.
+        /// smack: noise through a low-pass (lpA, 0..1, higher = brighter) and a high-pass (hpA, near 1 = higher cut),
+        /// decaying at smackDecay. crack: a 3 ms click. drive: saturation amount.
+        /// </summary>
+        public static AudioClip Impact(string name, int seed, float seconds, float bodyHi, float bodyLo, float bodyDecay,
+                                       float bodyGain, float lpA, float hpA, float smackGain, float smackDecay, float crackGain, float drive)
+        {
+            var rnd = new System.Random(seed);
+            float phase = 0f, lp = 0f, prevLp = 0f, hp = 0f;
+            return Make(name, seconds, t =>
+            {
+                float f = bodyLo + (bodyHi - bodyLo) * Mathf.Exp(-25f * t);
+                phase += 2f * Mathf.PI * f / Rate;
+                float body = Mathf.Sin(phase) * Mathf.Exp(-bodyDecay * t) * Mathf.Min(1f, t / 0.0015f);
+                float n = Noise(rnd);
+                lp += lpA * (n - lp);
+                hp = hpA * (hp + lp - prevLp);
+                prevLp = lp;
+                float smack = hp * Mathf.Exp(-smackDecay * t);
+                float crack = t < 0.003f ? n * (1f - t / 0.003f) : 0f;
+                float x = bodyGain * body + smackGain * smack + crackGain * crack;
+                return 0.92f * (float)Math.Tanh(drive * x);
+            });
+        }
 
         public static AudioClip Make(string name, float seconds, Func<float, float> wave)
         {

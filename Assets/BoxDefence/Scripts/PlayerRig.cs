@@ -1,3 +1,4 @@
+using Unity.XR.CoreUtils;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Controls;
@@ -44,6 +45,21 @@ namespace BoxDefence
                 f.y = 0f;
                 return f.sqrMagnitude > 1e-4f ? f.normalized : Vector3.forward;
             }
+        }
+
+        /// <summary>
+        /// Moves the whole XR rig so your head is at spot (keeping your height) and you face forward.
+        /// Your real room doesn't change; the arena is placed around you.
+        /// </summary>
+        public void PlaceInRing(Vector3 spot, Vector3 forward)
+        {
+            var origin = head ? head.GetComponentInParent<XROrigin>() : null;
+            if (!origin) return;
+            float angle = Vector3.SignedAngle(Facing, forward, Vector3.up);
+            origin.RotateAroundCameraUsingOriginUp(angle);
+            origin.MoveCameraToWorldLocation(new Vector3(spot.x, head.position.y, spot.z));
+            prevLeft = LeftGlovePos; prevRight = RightGlovePos;   // no fake velocity spike from the jump
+            LeftVelocity = RightVelocity = Vector3.zero;
         }
 
         Vector3 prevLeft, prevRight;

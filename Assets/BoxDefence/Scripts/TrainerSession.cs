@@ -120,9 +120,22 @@ namespace BoxDefence
 
         // ---------------------------------------------------------------- flow
 
+        [Header("Ring")]
+        public bool centreInRing = true;
+        public Vector3 ringCentre = new Vector3(0f, 0f, 0.5f);
+
+        /// <summary>You and him either side of the ring's centre, facing along the ring.</summary>
+        void PlaceInRing()
+        {
+            if (!centreInRing || !rig) return;
+            float half = opponent ? opponent.standDistance * 0.5f : 0.475f;
+            rig.PlaceInRing(ringCentre - Vector3.forward * half, Vector3.forward);
+        }
+
         void EnterMenu()
         {
             state = State.Menu;
+            PlaceInRing();
             facing = rig ? rig.Facing : Vector3.forward;
             opponent.StopAttacking();
             opponent.SetVisible(false);
@@ -144,6 +157,7 @@ namespace BoxDefence
         {
             level = chosen;
             if (levelMenu) levelMenu.Hide();
+            PlaceInRing();
             facing = rig.Facing;
             opponent.Recenter(facing, rig.HeadPos.y);
             session = new SessionRecord

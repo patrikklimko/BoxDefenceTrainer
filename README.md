@@ -2,9 +2,17 @@
 
 **Spar without the concussions.** A VR boxing defence trainer for Meta Quest 2: an opponent throws telegraphed punches, feints and combinations at your real head, and you slip, duck, pull back or block. The headset measures every move. No punch ever lands on a real skull.
 
-![Slipping and blocking in the headset](Media/demo.gif)
+![A Pro round: block, hit, counter](Media/demo.gif)
 
-**Demo video (1:44):** [Media/demo.mp4](Media/demo.mp4)
+**Demo video (1:14), final version:** [Media/demo.mp4](Media/demo.mp4). A Pro round under fight-night lighting, with counters and the round summary.
+
+**Earlier build (1:44):** [Media/demo-v1.mp4](Media/demo-v1.mp4). Hard and Medium rounds, the telegraph, feints and ducks.
+
+**In the real world:** what I'm actually doing in the room while the opponent punches, from the first build to the final one.
+
+![First build (left) and final version (right), with me in the room](BlogPosts/images/first-vs-final.jpg)
+
+[First build, 13 s](Media/real-world-first.mp4) · [Final version, 14 s](Media/real-world-final.mp4)
 
 ## The problem
 
@@ -28,11 +36,15 @@ VR can throw a real punch at your real head position. The headset tracks your he
 - **Adaptive difficulty.** Every 6 punches he speeds up if you defend almost everything and slows down if you're getting hit. He also gets 5 % faster each round.
 - **Coaching after every round.** Punch counts, reaction time, how long your guard was up, a bar per punch, and one or two concrete tips (for example "You bit on 5 of 5 feints. A glowing glove is not a punch yet").
 - **Everything is saved** as JSON on the headset, one file per session.
-- **Immersion:** an arena with about 150 fans, runtime-synthesised crowd and punch sounds, controller haptics on hits and blocks, a realistic opponent (Mixamo character), and your own body and gloves.
+- **A real opponent:** a Mixamo character fitted to your height, whose shoulders and hips turn into every punch.
+- **You in the centre of the ring:** the arena is placed around you wherever you stand in your room.
+- **Fight night:** a dark hall, a lit ring with light beams, and about 150 fans who bounce and jump when they cheer.
+- **Impacts you feel:** layered punch sounds synthesised at runtime, sparks on blocks, sweat when you land, and controller haptics.
+- **Your own body:** arms and gloves that follow your controllers.
 
-| ![Wind-up](BlogPosts/images/telegraph.jpg) | ![Your gloves](BlogPosts/images/my-gloves.jpg) | ![Round summary](BlogPosts/images/medium-summary.jpg) |
+| ![Wind-up](BlogPosts/images/body-into-punch.jpg) | ![Fight night](BlogPosts/images/fight-night-countdown.jpg) | ![Round summary](BlogPosts/images/pro-summary.jpg) |
 |---|---|---|
-| The wind-up glows yellow | Your arms and gloves | The round summary |
+| The wind-up: his glove glows, his body turns | Fight night | The round summary after Pro |
 
 ## Blog
 
@@ -41,6 +53,7 @@ VR can throw a real punch at your real head position. The headset tracks your he
 3. [From a toy to a training tool: levels, feints, Pro mode, coaching](BlogPosts/03-training.md)
 4. [Immersion: the arena, sound, haptics and a real body](BlogPosts/04-immersion.md)
 5. [Testing, results and what I would change](BlogPosts/05-results.md)
+6. [Personal reflection](BlogPosts/06-reflection.md)
 
 ## Build and run
 
@@ -70,17 +83,19 @@ Scripts/Core/       Pure logic with no scene dependencies, covered by the self-c
 Scripts/
   PlayerRig.cs        head and controller tracking, buttons, haptics
   Opponent.cs         attack loop, punches, feints, hit/block detection, Pro defence
-  HumanoidPuppet.cs   drives the Mixamo body: hand IK, height fitting, lean
+  HumanoidPuppet.cs   drives the Mixamo body: body twist and lean, planted feet, hand IK, height fitting
+  CrowdAnimator.cs    bounces the crowd, more when it cheers
   PlayerBody.cs       your arms (primitive IK arms, or the real body)
   TrainerSession.cs   menu → countdown → rounds → rest → summary; adaptivity; JSON logging
-  LevelMenu.cs, Hud.cs, Feedback.cs   pads, text and bars, sound/flash/haptics
+  LevelMenu.cs, Hud.cs, Feedback.cs   pads, text and bars, sound synthesis, particles, flash, haptics
 Editor/
   BoxDefenceSceneBuilder.cs   builds the scene from code
   BoxDefenceModels.cs         optional real models; falls back to primitives if missing
+  BoxDefenceFX.cs             combined crowd meshes, light beams, impact particles
   BoxDefenceSelfCheck.cs      31 checks of the core logic
 ```
 
-About 3,100 lines of C# in 16 files. The scene, materials and wiring are generated, so no step depends on dragging objects around in the editor.
+About 3,600 lines of C# in 18 files. The scene, materials and wiring are generated, so no step depends on dragging objects around in the editor.
 
 ## Credits
 

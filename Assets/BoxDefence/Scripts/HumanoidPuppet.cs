@@ -19,8 +19,10 @@ namespace BoxDefence
         [Tooltip("Shrink the bare hands so they stay inside the gloves")]
         public float handScale = 0.001f;   // hidden: the glove is the hand
 
-        /// <summary>World-space offset for the head, applied by bending the chest (slips, flinches).</summary>
+        /// <summary>World-space offset for the head (slips, flinches, leaning into a punch).</summary>
         [HideInInspector] public Vector3 headOffset;
+        /// <summary>Degrees the body turns about the vertical: shoulders and hips rotating into a punch.</summary>
+        [HideInInspector] public float twist;
 
         /// <summary>Where the animated head bone sits, in the model's own (unscaled) space, averaged over the idle bounce.</summary>
         public Vector3 HeadLocal { get; private set; } = new Vector3(0f, 1.6f, 0f);
@@ -64,6 +66,30 @@ namespace BoxDefence
 
         void OnAnimatorIK(int layer)
         {
+            // turn and lean the whole body around its centre of mass, keep the feet planted,
+            // and only then solve the hands, so they stay in the gloves
+            Quaternion extra = Quaternion.identity;
+            if (Mathf.Abs(twist) > 0.01f) extra = Quaternion.AngleAxis(twist, transform.up);
+            if (headOffset.sqrMagnitude > 1e-6f)
+            {
+                Vector3 a = transform.TransformPoint(HeadLocal) - anim.bodyPosition;
+                extra = Quaternion.FromToRotation(a, a + headOffset) * extra;
+            }
+            bool turned = extra != Quaternion.identity;
+            if (turned)
+            {
+                Vector3 lf = anim.GetIKPosition(AvatarIKGoal.LeftFoot), rf = anim.GetIKPosition(AvatarIKGoal.RightFoot);
+                Quaternion lr = anim.GetIKRotation(AvatarIKGoal.LeftFoot), rr = anim.GetIKRotation(AvatarIKGoal.RightFoot);
+                anim.bodyRotation = extra * anim.bodyRotation;
+                PinFoot(AvatarIKGoal.LeftFoot, lf, lr);
+                PinFoot(AvatarIKGoal.RightFoot, rf, rr);
+            }
+            else
+            {
+                anim.SetIKPositionWeight(AvatarIKGoal.LeftFoot, 0f); anim.SetIKRotationWeight(AvatarIKGoal.LeftFoot, 0f);
+                anim.SetIKPositionWeight(AvatarIKGoal.RightFoot, 0f); anim.SetIKRotationWeight(AvatarIKGoal.RightFoot, 0f);
+            }
+
             SetHand(AvatarIKGoal.LeftHand, leftWrist);
             SetHand(AvatarIKGoal.RightHand, rightWrist);
             if (lookTarget)
@@ -72,6 +98,14 @@ namespace BoxDefence
                 anim.SetLookAtPosition(lookTarget.position);
             }
             else anim.SetLookAtWeight(0f);
+        }
+
+        void PinFoot(AvatarIKGoal goal, Vector3 pos, Quaternion rot)
+        {
+            anim.SetIKPositionWeight(goal, 1f);
+            anim.SetIKRotationWeight(goal, 1f);
+            anim.SetIKPosition(goal, pos);
+            anim.SetIKRotation(goal, rot);
         }
 
         void SetHand(AvatarIKGoal goal, Transform target)
@@ -84,9 +118,9 @@ namespace BoxDefence
 
         void LateUpdate()
         {
-            if (headBone)
+            if (headBone && (!measured || (headOffset.sqrMagnitude < 1e-4f && Mathf.Abs(twist) < 2f)))
             {
-                // measured after the animation, before our own lean, so it is the stance itself
+                // measured only while he stands in his plain stance, so leans and twists aren't averaged away
                 Vector3 hl = transform.InverseTransformPoint(headBone.position);
                 HeadLocal = measured ? Vector3.Lerp(HeadLocal, hl, 0.05f) : hl;
                 measured = true;
@@ -95,11 +129,6 @@ namespace BoxDefence
             if (hideHead && headBone) headBone.localScale = Vector3.one * 0.001f;
             if (handL) handL.localScale = Vector3.one * handScale;
             if (handR) handR.localScale = Vector3.one * handScale;
-            if (chestBone && headBone && headOffset.sqrMagnitude > 1e-6f)
-            {
-                Vector3 a = headBone.position - chestBone.position;
-                chestBone.rotation = Quaternion.FromToRotation(a, a + headOffset) * chestBone.rotation;
-            }
         }
     }
 }
